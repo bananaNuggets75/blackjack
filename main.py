@@ -48,6 +48,10 @@ class Hand:
             self.value -= 10
             self.aces -= 1
 
+    def surrender(self, chips):
+        chips.total -= chips.bet // 2
+        print("Player surrenders. Half of the bet is returned.")
+
 class Chips:
     def __init__(self):
         self.total = 100
@@ -81,12 +85,14 @@ def hit(deck, hand):
 def hit_or_stand(deck, hand):
     global playing
     while True:
-        ask = input("\nWould you like to hit or stand? Please enter [h]it or [s]tand: ")
-
+        ask = input("\nWould you like to [h]it, [s]tand, or [u]surrender? ")
         if ask[0].lower() == 'h':
             hit(deck, hand)
         elif ask[0].lower() == 's':
             print("Player stands, Dealer is playing.")
+            playing = False
+        elif ask[0].lower() == 'u':
+            hand.surrender(player_chips)
             playing = False
         else:
             print("Sorry! I did not understand that! Please try again!")
@@ -110,29 +116,63 @@ def player_busts(player, dealer, chips):
     chips.lose_bet()
 
 def player_wins(player, dealer, chips):
-    print("PLAYER WINS!")
-    chips.win_bet()
+    if player.value == 21 and len(player.cards) == 2:
+        print("PLAYER BLACKJACK!")
+        chips.win_bet()
+    else:
+        print("PLAYER WINS!")
+        chips.win_bet()
+    print(f"Player's Chips: {chips.total}")
 
 def dealer_busts(player, dealer, chips):
     print("DEALER BUSTS!")
     chips.win_bet()
 
 def dealer_wins(player, dealer, chips):
-    print("DEALER WINS!")
-    chips.lose_bet()
-
-def player_blackjack(player, dealer, chips):
-    print("Congratulation! Player Blackjack")
-    chips.win_bet()
-
-def dealer_blackjack(player, dealer, chips):
-    print("Congratulation! Dealer Blackjack")
-    chips.lose_bet()
+    if dealer.value == 21 and len(dealer.cards) == 2:
+        print("DEALER BLACKJACK!")
+        chips.lose_bet()
+    else:
+        print("DEALER WINS!")
+        chips.lose_bet()
+    print(f"Player's Chips: {chips.total}")
 
 def push(player, dealer):
     print("Its a push! Player and Dealer tie!")
 
-# ... (existing code)
+class GameStats:
+    def __init__(self):
+        self.games_played = 0
+        self.player_wins = 0
+        self.dealer_wins = 0
+        self.pushes = 0
+        self.player_blackjacks = 0
+        self.dealer_blackjacks = 0
+
+    def update_stats(self, result):
+        self.games_played += 1
+        if result == 'player':
+            self.player_wins += 1
+        elif result == 'dealer':
+            self.dealer_wins += 1
+        elif result == 'push':
+            self.pushes += 1
+        elif result == 'player_blackjack':
+            self.player_blackjacks += 1
+        elif result == 'dealer_blackjack':
+            self.dealer_blackjacks += 1
+
+    def display_stats(self):
+        print("\nGame Statistics:")
+        print(f"Games Played: {self.games_played}")
+        print(f"Player Wins: {self.player_wins}")
+        print(f"Dealer Wins: {self.dealer_wins}")
+        print(f"Pushes: {self.pushes}")
+        print(f"Player Blackjacks: {self.player_blackjacks}")
+        print(f"Dealer Blackjacks: {self.dealer_blackjacks}")
+
+game_stats = GameStats()
+
 
 def reset_hands(deck, player_hand, dealer_hand):
     player_hand.cards = []
@@ -182,6 +222,7 @@ while True:
 
             if player_hand.value > 21:
                 player_busts(player_hand, dealer_hand, player_chips)
+                game_stats.update_stats('dealer')
                 break
 
         if player_hand.value <= 21:
@@ -192,14 +233,19 @@ while True:
 
             if dealer_hand.value > 21:
                 dealer_busts(player_hand, dealer_hand, player_chips)
+                game_stats.update_stats('player')
             elif dealer_hand.value > player_hand.value:
                 dealer_wins(player_hand, dealer_hand, player_chips)
+                game_stats.update_stats('dealer')
             elif dealer_hand.value < player_hand.value:
                 player_wins(player_hand, dealer_hand, player_chips)
+                game_stats.update_stats('player')
             elif player_hand.value == dealer_hand.value:
                 push(player_hand, dealer_hand)
+                game_stats.update_stats('push')
 
-        print("\nPlayer's winnings stand at", player_chips.total)
+        game_stats.display_stats()
+        print("\nPlayer's remaining chips: ", player_chips.total)
 
         if player_chips.total == 0:
             print("\nYou've run out of chips!")
@@ -207,10 +253,13 @@ while True:
                 print("\nThanks for playing!")
                 break
         else:
-            new_game = input("\nWould you like to play again? Enter 'y' or 'n': ")
-            if new_game[0].lower() == 'y':
-                continue
-            else:
-                print("\nThanks for playing!")
-                break
-
+            while True:
+                new_game = input("\nWould you like to play again? Enter 'y' or 'n': ")
+                if new_game[0].lower() == 'y':
+                    print("Current Chips: ", player_chips.total)
+                    break
+                elif new_game[0].lower() == 'n':
+                    print("\nThanks for playing!")
+                    exit()  # Terminate the game
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
