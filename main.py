@@ -87,6 +87,18 @@ def take_bet(chips):
             else:
                 break
 
+def play_hand(deck, hand):
+    while True:
+        ask = input("\nWould you like to [h]it or [s]tand? ")
+        if ask[0].lower() == 'h':
+            hit(deck, hand)
+            if hand.value > 21:
+                print("Bust!")
+                break
+        elif ask[0].lower() == 's':
+            print("Stand.")
+            break
+
 def hit(deck, hand):
     hand.add_card(deck.deal())
     hand.adjust_for_ace()
