@@ -52,6 +52,15 @@ class Hand:
         chips.total -= chips.bet // 2
         print("Player surrenders. Half of the bet is returned.")
 
+    def can_split(self):
+        return len(self.cards) == 2 and self.cards[0].rank == self.cards[1].rank
+
+    def split_hand(self):
+        card = self.cards.pop()
+        new_hand = Hand()
+        new_hand.add_card(card)
+        return new_hand
+
 class Chips:
     def __init__(self):
         self.total = 100
