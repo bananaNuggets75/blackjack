@@ -115,6 +115,16 @@ def hit_or_stand(deck, hand):
         elif ask[0].lower() == 'u':
             hand.surrender(player_chips)
             playing = False
+        elif ask[0].lower() == 'p':
+            if hand.can_split():
+                split_hand = hand.split_hand()
+                hands = [hand, split_hand]
+                for hand in hands:
+                    print("\nPlaying hand:", hands.index(hand) + 1)
+                    play_hand(deck, hand)
+                playing = False
+            else:
+                print("You cannot split your hand.")
         else:
             print("Sorry! I did not understand that! Please try again!")
             continue
