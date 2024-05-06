@@ -72,20 +72,32 @@ class Chips:
     def lose_bet(self):
         self.total -= self.bet
 
-def display_chips(chips):
-    print(f"\nWelcome {playername}! You currently have {chips.total} chips.")
+def display_chips():
+    while True:
+        try:
+            chips = int(input("Enter how many chips you want to play with: "))
+            if chips <= 0:
+                print("Please enter a positive number of chips.")
+            else:
+                break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+    print(f"\nWelcome {playername}! You currently have {chips} chips.")
+    return chips
 
 def take_bet(chips):
     while True:
         try:
             chips.bet = int(input("How many chips would you like to bet? "))
-        except ValueError:
-            print("Sorry! Please can you type in a number: ")
-        else:
-            if chips.bet > chips.total:
+            if chips.bet <= 0:
+                print("Please enter a positive bet amount.")
+            elif chips.bet > chips.total:
                 print("You bet can't exceed your total chips!")
             else:
                 break
+        except ValueError:
+            print("Sorry! Please can you type in a number: ")
 
 def play_hand(deck, hand):
     while True:
@@ -236,8 +248,7 @@ while True:
     dealer_hand = Hand()
 
     player_chips = Chips()
-
-    display_chips(player_chips)
+    player_chips.total = display_chips()
 
     while player_chips.total > 0:
         take_bet(player_chips)
