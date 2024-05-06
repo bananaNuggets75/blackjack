@@ -90,22 +90,31 @@ def take_bet(chips):
     while True:
         try:
             print("Current Chips: ", chips.total)
-            bet_option = input("How many chips would you like to bet? [Enter 'd' to double down] ")
-            if bet_option.lower() == 'd':
-                if chips.total >= chips.bet * 2:
-                    chips.bet *= 2
-                    print("You chose to double down.")
-                    break
-                else:
-                    print("Insufficient chips to double down. Please enter a valid bet.")
-            else:
+            bet_option = input("How many chips would you like to bet? ")
+            if bet_option.isdigit():
                 chips.bet = int(bet_option)
                 if chips.bet > chips.total:
                     print("You bet can't exceed your total chips!")
                 else:
                     break
+            else:
+                print("Please enter a valid number for your bet.")
         except ValueError:
             print("Sorry! Please enter a valid number for your bet.")
+
+    while True:
+        double_down_option = input("Would you like to double down? [y/n] ")
+        if double_down_option.lower() == 'y':
+            if chips.total >= chips.bet * 2:
+                chips.bet *= 2
+                print("You chose to double down.")
+                break
+            else:
+                print("Insufficient chips to double down. Please enter a valid bet.")
+        elif double_down_option.lower() == 'n':
+            break
+        else:
+            print("Please enter 'y' or 'n' for your choice.")
 
 
 def play_hand(deck, hand):
@@ -136,20 +145,19 @@ def hit_or_stand(deck, hand):
         elif ask[0].lower() == 'u':
             hand.surrender(player_chips)
             playing = False
-        elif ask[0].lower() == 'p':
-            if hand.can_split():
-                split_hand = hand.split_hand()
-                hands = [hand, split_hand]
-                for hand in hands:
-                    print("\nPlaying hand:", hands.index(hand) + 1)
-                    play_hand(deck, hand)
+        elif ask[0].lower() == 'd':
+            if player_chips.total >= player_chips.bet * 2:
+                print("You chose to double down.")
+                player_chips.bet *= 2
+                hit(deck, hand)
                 playing = False
             else:
-                print("You cannot split your hand.")
+                print("Insufficient chips to double down.")
         else:
             print("Sorry! I did not understand that! Please try again!")
             continue
         break
+
 
 def show_some(player, dealer):
     print("\nDealer's Hand: ")
