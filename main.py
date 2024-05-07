@@ -19,11 +19,17 @@ class Card:
         return self.rank + ' of ' + self.suit
 
 class Deck:
-    def __init__(self):
+    def __init__(self, num_decks=1):
         self.deck = []
-        for suit in suits:
-            for rank in ranks:
-                self.deck.append(Card(suit, rank))
+        self.num_decks = num_decks
+        self.create_deck()
+        self.shuffle()
+
+    def create_deck(self):
+        for _ in range(self.num_decks):
+            for suit in suits:
+                for rank in ranks:
+                    self.deck.append(Card(suit, rank))
 
     def shuffle(self):
         random.shuffle(self.deck)
@@ -257,6 +263,9 @@ def continue_playing():
 # Gameplay!
 while True:
     print("Welcome to BlackJack!")
+
+    num_decks = int(input("How many decks would you like to use? "))
+    deck_random = Deck(num_decks)
 
     deck = Deck()
     deck.shuffle()
