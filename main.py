@@ -96,7 +96,6 @@ def display_chips():
 def take_bet(chips):
     while True:
         try:
-            print("Current Chips: ", chips.total)
             bet_option = int(input("How many chips would you like to bet? "))
             if bet_option <= 0:
                 print("Please enter a positive bet amount.")
@@ -126,7 +125,7 @@ def take_bet(chips):
                             if new_bet > chips.total:
                                 print("You can't bet more than your total chips!")
                                 continue
-                            chips.bet = new_bet
+                            chips.bet = new_bet * 2
                             print("You chose to double down with a different bet amount.")
                             break
                         except ValueError:
@@ -140,7 +139,6 @@ def take_bet(chips):
             break
         else:
             print("Please enter 'y' or 'n' for your choice.")
-
 
 
 def play_hand(deck, hand):
