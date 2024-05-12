@@ -90,6 +90,14 @@ class NPCPlayer:
             bet_amount = self.chips
         return bet_amount
 
+    def make_decision(self, player_hand):
+        while self.get_hand_value(player_hand) < 17:
+            return 'hit'
+        return 'stand'
+
+    def get_hand_value(self, hand):
+        hand_value = sum(values[card.rank] for card in hand.cards)
+        return hand_value
 
 def display_chips():
     while True:
