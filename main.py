@@ -10,6 +10,7 @@ playername = input("Enter your player name: ")
 playing = True
 
 # CLASSES
+
 class Card:
     def __init__(self, suit, rank):
         self.suit = suit
@@ -96,17 +97,17 @@ def take_bet(chips):
     while True:
         try:
             print("Current Chips: ", chips.total)
-            bet_option = input("How many chips would you like to bet? ")
-            if bet_option.isdigit():
-                chips.bet = int(bet_option)
-                if chips.bet > chips.total:
-                    print("You bet can't exceed your total chips!")
-                else:
-                    break
-            else:
-                print("Please enter a valid number for your bet.")
+            bet_option = int(input("How many chips would you like to bet? "))
+            if bet_option <= 0:
+                print("Please enter a positive bet amount.")
+                continue
+            if bet_option > chips.total:
+                print("You can't bet more than your total chips!")
+                continue
+            chips.bet = bet_option
+            break
         except ValueError:
-            print("Sorry! Please enter a valid number for your bet.")
+            print("Invalid input. Please enter a valid number.")
 
     while True:
         double_down_option = input("Would you like to double down? [y/n] ")
@@ -116,11 +117,30 @@ def take_bet(chips):
                 print("You chose to double down.")
                 break
             else:
-                print("Insufficient chips to double down. Please enter a valid bet.")
+                print("Insufficient chips to double down.")
+                retry_option = input("Would you like to enter another bet amount? [y/n] ")
+                if retry_option.lower() == 'y':
+                    while True:
+                        try:
+                            new_bet = int(input("Enter a different bet amount: "))
+                            if new_bet > chips.total:
+                                print("You can't bet more than your total chips!")
+                                continue
+                            chips.bet = new_bet
+                            print("You chose to double down with a different bet amount.")
+                            break
+                        except ValueError:
+                            print("Invalid input. Please enter a valid number.")
+                    break
+                elif retry_option.lower() == 'n':
+                    break
+                else:
+                    print("Please enter 'y' or 'n' for your choice.")
         elif double_down_option.lower() == 'n':
             break
         else:
             print("Please enter 'y' or 'n' for your choice.")
+
 
 
 def play_hand(deck, hand):
@@ -262,7 +282,7 @@ def continue_playing():
 
 # Gameplay!
 while True:
-    print("Welcome to BlackJack!")
+    print(f"Welcome to BlackJack, {playername}!")
 
     num_decks = int(input("How many decks would you like to use? "))
     deck_random = Deck(num_decks)
