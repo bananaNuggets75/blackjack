@@ -305,6 +305,8 @@ while True:
     num_decks = int(input("How many decks would you like to use? "))
     deck_random = Deck(num_decks)
 
+    npc_player = NPCPlayer("NPC")
+
     deck = Deck()
     deck.shuffle()
 
@@ -334,6 +336,9 @@ while True:
         if player_hand.value <= 21:
             while dealer_hand.value < 17:
                 hit(deck, dealer_hand)
+
+            while npc_player.get_hand_value(dealer_hand) < 17:
+                dealer_hand.add_card(deck.deal())
 
             show_all(player_hand, dealer_hand)
 
