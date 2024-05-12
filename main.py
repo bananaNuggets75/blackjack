@@ -84,6 +84,12 @@ class NPCPlayer:
         self.name = name
         self.chips = chips
 
+    def take_bet(self):
+        bet_amount = random.randint(0, 500)
+        if bet_amount > self.chips:
+            bet_amount = self.chips
+        return bet_amount
+
 
 def display_chips():
     while True:
