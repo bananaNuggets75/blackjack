@@ -79,6 +79,12 @@ class Chips:
     def lose_bet(self):
         self.total -= self.bet
 
+class NPCPlayer:
+    def __init__(self, name, chips=100):
+        self.name = name
+        self.chips = chips
+
+
 def display_chips():
     while True:
         try:
