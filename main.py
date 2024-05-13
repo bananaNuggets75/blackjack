@@ -203,17 +203,21 @@ def hit_or_stand(deck, hand):
         break
 
 
-def show_some(player, dealer):
+def show_some(player, dealer, npc):
     print("\nDealer's Hand: ")
     print(" <card hidden>")
     print("", dealer.cards[1])
     print("\nPlayer's Hand: ", *player.cards, sep='\n ')
+    print("\nNPC's Hand: ", *npc.cards, sep='\n ')
 
-def show_all(player, dealer):
+def show_all(player, dealer, npc):
     print("\nDealer's Hand: ", *dealer.cards, sep='\n ')
     print("Dealer's Hand =", dealer.value)
     print("\nPlayer's Hand: ", *player.cards, sep='\n ')
     print("Player's Hand =", player.value)
+    print("\nNPC's Hand: ", *npc.cards, sep='\n ')
+    print("NPC's Hand =", npc.value)
+
 
 def player_busts(player, dealer, chips):
     print("PLAYER BUSTS!")
@@ -306,6 +310,7 @@ while True:
     deck_random = Deck(num_decks)
 
     npc_player = NPCPlayer("NPC")
+    
 
     deck = Deck()
     deck.shuffle()
