@@ -293,6 +293,8 @@ def reset_hands(deck, player_hand, dealer_hand):
     player_hand.add_card(deck.deal())
     dealer_hand.add_card(deck.deal())
     dealer_hand.add_card(deck.deal())
+    npc_hand.add_card(deck.deal())
+    npc_hand.add_card(deck.deal())
 
 def continue_playing():
     while True:
@@ -317,6 +319,7 @@ while True:
 
     player_hand = Hand()
     dealer_hand = Hand()
+    npc_hand = Hand()
 
     player_chips = Chips()
     player_chips.total = display_chips()
@@ -324,14 +327,14 @@ while True:
     while player_chips.total > 0:
         take_bet(player_chips)
 
-        reset_hands(deck, player_hand, dealer_hand)
+        reset_hands(deck, player_hand, dealer_hand, npc_hand)
 
-        show_some(player_hand, dealer_hand)
+        show_some(player_hand, dealer_hand, npc_hand)
 
         playing = True
         while playing:
             hit_or_stand(deck, player_hand)
-            show_some(player_hand, dealer_hand)
+            show_some(player_hand, dealer_hand, npc_hand)
 
             if player_hand.value > 21:
                 player_busts(player_hand, dealer_hand, player_chips)
@@ -342,10 +345,12 @@ while True:
             while dealer_hand.value < 17:
                 hit(deck, dealer_hand)
 
-            while npc_player.get_hand_value(dealer_hand) < 17:
-                dealer_hand.add_card(deck.deal())
+            npc_decision = npc_player.make_decision(npc_hand)
+            while npc_decision == 'hit':
+                hit(deck, npc_hand)
+                npc_decision = npc_player.make_decision(npc_hand)
 
-            show_all(player_hand, dealer_hand)
+            show_all(player_hand, dealer_hand, npc_hand)
 
             if dealer_hand.value > 21:
                 dealer_busts(player_hand, dealer_hand, player_chips)
