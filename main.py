@@ -282,7 +282,7 @@ class GameStats:
 game_stats = GameStats()
 
 
-def reset_hands(deck, player_hand, dealer_hand):
+def reset_hands(deck, player_hand, dealer_hand, npc_hand):
     player_hand.cards = []
     dealer_hand.cards = []
     player_hand.value = 0
