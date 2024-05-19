@@ -334,6 +334,8 @@ while True:
 
     while player_chips.total > 0:
         take_bet(player_chips)
+        npc_bet = npc_player.take_bet()
+        print(f"{npc_player.name} bets: {npc_bet}")
 
         reset_hands(deck, player_hand, dealer_hand, npc_hand)
 
