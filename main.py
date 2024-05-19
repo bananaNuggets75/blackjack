@@ -220,28 +220,28 @@ def show_all(player, dealer, npc):
 
 
 def player_busts(player, dealer, chips):
-    print("PLAYER BUSTS!")
+    print("\nPLAYER BUSTS!")
     chips.lose_bet()
 
 def player_wins(player, dealer, chips):
     if player.value == 21 and len(player.cards) == 2:
-        print("PLAYER BLACKJACK!")
+        print("\nPLAYER BLACKJACK!")
         chips.win_bet()
     else:
-        print("PLAYER WINS!")
+        print("\nPLAYER WINS!")
         chips.win_bet()
     print(f"Player's Chips: {chips.total}")
 
 def dealer_busts(player, dealer, chips):
-    print("DEALER BUSTS!")
+    print("\nDEALER BUSTS!")
     chips.win_bet()
 
 def dealer_wins(player, dealer, chips):
     if dealer.value == 21 and len(dealer.cards) == 2:
-        print("DEALER BLACKJACK!")
+        print("\nDEALER BLACKJACK!")
         chips.lose_bet()
     else:
-        print("DEALER WINS!")
+        print("\nDEALER WINS!")
         chips.lose_bet()
     print(f"Player's Chips: {chips.total}")
 
@@ -253,11 +253,13 @@ class GameStats:
         self.games_played = 0
         self.player_wins = 0
         self.dealer_wins = 0
+        self.npc_wins = 0
         self.pushes = 0
         self.player_blackjacks = 0
         self.dealer_blackjacks = 0
+        self.npc_blackjacks = 0
 
-    def update_stats(self, result):
+    def update_stats(self, result, npc_result=None):
         self.games_played += 1
         if result == 'player':
             self.player_wins += 1
@@ -269,15 +271,21 @@ class GameStats:
             self.player_blackjacks += 1
         elif result == 'dealer_blackjack':
             self.dealer_blackjacks += 1
+        elif npc_result == 'npc':
+            self.npc_wins += 1
+        elif npc_result == 'npc_blackjack':
+            self.npc_blackjacks += 1
 
     def display_stats(self):
         print("\nGame Statistics:")
         print(f"Games Played: {self.games_played}")
         print(f"Player Wins: {self.player_wins}")
         print(f"Dealer Wins: {self.dealer_wins}")
+        print(f"NPC Wins: {self.npc_wins}")
         print(f"Pushes: {self.pushes}")
         print(f"Player Blackjacks: {self.player_blackjacks}")
         print(f"Dealer Blackjacks: {self.dealer_blackjacks}")
+        print(f"NPC Blackjacks: {self.npc_blackjacks}")
 
 game_stats = GameStats()
 
@@ -364,6 +372,13 @@ while True:
             elif player_hand.value == dealer_hand.value:
                 push(player_hand, dealer_hand)
                 game_stats.update_stats('push')
+
+            if npc_player.get_hand_value(dealer_hand) > 21:
+                print("NPC BUSTS!")
+                game_stats.update_stats('player', 'npc')
+            elif npc_player.get_hand_value(dealer_hand) == 21 and len(dealer_hand.cards) == 2:
+                print("NPC Blackjack!")
+                game_stats.update_stats('player_blackjack', 'npc_blackjack')
 
         game_stats.display_stats()
         print("\nPlayer's remaining chips: ", player_chips.total)
