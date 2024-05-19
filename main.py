@@ -177,30 +177,42 @@ def hit(deck, hand):
     hand.add_card(deck.deal())
     hand.adjust_for_ace()
 
-def hit_or_stand(deck, hand):
+def hit_or_stand(deck, hand, dealer=False):
     global playing
     while True:
-        ask = input("\nWould you like to [h]it, [s]tand, or [u]surrender? ")
-        if ask[0].lower() == 'h':
-            hit(deck, hand)
-        elif ask[0].lower() == 's':
-            print("Player stands, Dealer is playing.")
-            playing = False
-        elif ask[0].lower() == 'u':
-            hand.surrender(player_chips)
-            playing = False
-        elif ask[0].lower() == 'd':
-            if player_chips.total >= player_chips.bet * 2:
-                print("You chose to double down.")
-                player_chips.bet *= 2
-                hit(deck, hand)
+        if dealer:
+            if hand.value >= 17:
+                print("Dealer stands.")
                 playing = False
+                break
             else:
-                print("Insufficient chips to double down.")
+                hit(deck, hand)
+                print("Dealer hits.")
+                print(f"Dealer's Hand: {hand.value}")
         else:
-            print("Sorry! I did not understand that! Please try again!")
-            continue
+            ask = input("\nWould you like to [h]it, [s]tand, or [u]surrender? ")
+            if ask[0].lower() == 'h':
+                hit(deck, hand)
+                print("Player hits.")
+            elif ask[0].lower() == 's':
+                print("Player stands.")
+                playing = False
+            elif ask[0].lower() == 'u':
+                hand.surrender(player_chips)
+                playing = False
+            elif ask[0].lower() == 'd':
+                if player_chips.total >= player_chips.bet * 2:
+                    print("You chose to double down.")
+                    player_chips.bet *= 2
+                    hit(deck, hand)
+                    playing = False
+                else:
+                    print("Insufficient chips to double down.")
+            else:
+                print("Sorry! I did not understand that! Please try again!")
+                continue
         break
+
 
 
 def show_some(player, dealer, npc):
@@ -253,39 +265,42 @@ class GameStats:
         self.games_played = 0
         self.player_wins = 0
         self.dealer_wins = 0
-        self.npc_wins = 0
         self.pushes = 0
         self.player_blackjacks = 0
         self.dealer_blackjacks = 0
-        self.npc_blackjacks = 0
+        self.dealer_surrenders = 0
+        self.dealer_folds = 0
 
-    def update_stats(self, result, npc_result=None):
+    def update_stats(self, result, dealer=False):
         self.games_played += 1
-        if result == 'player':
-            self.player_wins += 1
-        elif result == 'dealer':
-            self.dealer_wins += 1
-        elif result == 'push':
-            self.pushes += 1
-        elif result == 'player_blackjack':
-            self.player_blackjacks += 1
-        elif result == 'dealer_blackjack':
-            self.dealer_blackjacks += 1
-        elif npc_result == 'npc':
-            self.npc_wins += 1
-        elif npc_result == 'npc_blackjack':
-            self.npc_blackjacks += 1
+        if dealer:
+            if result == 'dealer':
+                self.dealer_wins += 1
+            elif result == 'dealer_blackjack':
+                self.dealer_blackjacks += 1
+            elif result == 'dealer_surrender':
+                self.dealer_surrenders += 1
+            elif result == 'dealer_fold':
+                self.dealer_folds += 1
+        else:
+            if result == 'player':
+                self.player_wins += 1
+            elif result == 'player_blackjack':
+                self.player_blackjacks += 1
+            elif result == 'push':
+                self.pushes += 1
 
     def display_stats(self):
         print("\nGame Statistics:")
         print(f"Games Played: {self.games_played}")
         print(f"Player Wins: {self.player_wins}")
         print(f"Dealer Wins: {self.dealer_wins}")
-        print(f"NPC Wins: {self.npc_wins}")
         print(f"Pushes: {self.pushes}")
         print(f"Player Blackjacks: {self.player_blackjacks}")
         print(f"Dealer Blackjacks: {self.dealer_blackjacks}")
-        print(f"NPC Blackjacks: {self.npc_blackjacks}")
+        print(f"Dealer Surrenders: {self.dealer_surrenders}")
+        print(f"Dealer Folds: {self.dealer_folds}")
+
 
 game_stats = GameStats()
 
@@ -377,10 +392,10 @@ while True:
 
             if npc_player.get_hand_value(dealer_hand) > 21:
                 print("NPC BUSTS!")
-                game_stats.update_stats('player', 'npc')
+                game_stats.update_stats('player', dealer=True)
             elif npc_player.get_hand_value(dealer_hand) == 21 and len(dealer_hand.cards) == 2:
                 print("NPC Blackjack!")
-                game_stats.update_stats('player_blackjack', 'npc_blackjack')
+                game_stats.update_stats('player_blackjack', dealer=True)
 
         game_stats.display_stats()
         print("\nPlayer's remaining chips: ", player_chips.total)
