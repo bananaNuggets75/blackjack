@@ -99,6 +99,32 @@ class NPCPlayer:
         hand_value = sum(values[card.rank] for card in hand.cards)
         return hand_value
 
+def dealer_play(deck, dealer_hand):
+    while dealer_hand.value < 17:
+        hit(deck, dealer_hand)
+        if dealer_hand.value > 21:
+            print("Dealer BUSTS!")
+            game_stats.update_stats('player')
+            return 'bust'
+    if dealer_hand.value == 17:
+        print("Dealer stands.")
+        return 'stand'
+    else:
+        return 'hit'
+
+def npc_play(deck, npc_hand):
+    while npc_hand.value < 17:
+        hit(deck, npc_hand)
+        if npc_hand.value > 21:
+            print("NPC BUSTS!")
+            game_stats.update_stats('player', 'npc')
+            return 'bust'
+    if npc_hand.value == 17:
+        print("NPC stands.")
+        return 'stand'
+    else:
+        return 'hit'
+
 def display_chips():
     while True:
         try:
@@ -257,8 +283,9 @@ def dealer_wins(player, dealer, chips):
         chips.lose_bet()
     print(f"Player's Chips: {chips.total}")
 
-def push(player, dealer):
-    print("Its a push! Player and Dealer tie!")
+def push(player, dealer, npc):
+    print("Its a push! Player, Dealer, and NPC tie!")
+
 
 class GameStats:
     def __init__(self):
@@ -270,27 +297,33 @@ class GameStats:
         self.dealer_blackjacks = 0
         self.dealer_surrenders = 0
         self.dealer_folds = 0
+        self.npc_wins = 0
+        self.npc_blackjacks = 0
 
-    def update_stats(self, result, dealer=False):
+    def update_stats(self, player_result, dealer_result=None):
         self.games_played += 1
-        if dealer:
-            if result == 'dealer':
-                self.dealer_wins += 1
-            elif result == 'dealer_blackjack':
-                self.dealer_blackjacks += 1
-            elif result == 'dealer_surrender':
-                self.dealer_surrenders += 1
-            elif result == 'dealer_fold':
-                self.dealer_folds += 1
-        else:
-            if result == 'player':
-                self.player_wins += 1
-            elif result == 'player_blackjack':
-                self.player_blackjacks += 1
-            elif result == 'push':
-                self.pushes += 1
+        if player_result == 'player':
+            self.player_wins += 1
+        elif player_result == 'player_blackjack':
+            self.player_blackjacks += 1
+        elif player_result == 'dealer':
+            self.dealer_wins += 1
+        elif player_result == 'push':
+            self.pushes += 1
 
-    def display_stats(self):
+        if dealer_result == 'dealer_blackjack':
+            self.dealer_blackjacks += 1
+        elif dealer_result == 'dealer_surrender':
+            self.dealer_surrenders += 1
+        elif dealer_result == 'dealer_fold':
+            self.dealer_folds += 1
+
+        if dealer_result == 'npc':
+            self.npc_wins += 1
+        elif dealer_result == 'npc_blackjack':
+            self.npc_blackjacks += 1
+
+    def show_stats(self):
         print("\nGame Statistics:")
         print(f"Games Played: {self.games_played}")
         print(f"Player Wins: {self.player_wins}")
@@ -300,24 +333,27 @@ class GameStats:
         print(f"Dealer Blackjacks: {self.dealer_blackjacks}")
         print(f"Dealer Surrenders: {self.dealer_surrenders}")
         print(f"Dealer Folds: {self.dealer_folds}")
-
-
-game_stats = GameStats()
+        print(f"NPC Wins: {self.npc_wins}")
+        print(f"NPC Blackjacks: {self.npc_blackjacks}")
 
 
 def reset_hands(deck, player_hand, dealer_hand, npc_hand):
     player_hand.cards = []
     dealer_hand.cards = []
+    npc_hand.cards = []
     player_hand.value = 0
     dealer_hand.value = 0
+    npc_hand.value = 0
     player_hand.aces = 0
     dealer_hand.aces = 0
+    npc_hand.aces = 0
     player_hand.add_card(deck.deal())
     player_hand.add_card(deck.deal())
     dealer_hand.add_card(deck.deal())
     dealer_hand.add_card(deck.deal())
     npc_hand.add_card(deck.deal())
     npc_hand.add_card(deck.deal())
+
 
 def continue_playing():
     while True:
@@ -327,15 +363,20 @@ def continue_playing():
         else:
             print("Invalid choice. Please enter 'y' or 'n'.")
 
-# Gameplay!
+
+# GAMEPLAY
+
+player_chips = Chips()
+game_stats = GameStats()
+npc_player = NPCPlayer("NPC")
+
 while True:
-    print(f"Welcome to BlackJack, {playername}!")
+    print(f"\nWelcome to BlackJack, {playername}!\n")
 
     num_decks = int(input("How many decks would you like to use? "))
     deck_random = Deck(num_decks)
 
     npc_player = NPCPlayer("NPC")
-    
 
     deck = Deck()
     deck.shuffle()
@@ -367,13 +408,8 @@ while True:
                 break
 
         if player_hand.value <= 21:
-            while dealer_hand.value < 17:
-                hit(deck, dealer_hand)
-
-            npc_decision = npc_player.make_decision(npc_hand)
-            while npc_decision == 'hit':
-                hit(deck, npc_hand)
-                npc_decision = npc_player.make_decision(npc_hand)
+            dealer_action = dealer_play(deck, dealer_hand)
+            npc_action = npc_play(deck, npc_hand)
 
             show_all(player_hand, dealer_hand, npc_hand)
 
@@ -387,17 +423,17 @@ while True:
                 player_wins(player_hand, dealer_hand, player_chips)
                 game_stats.update_stats('player')
             elif player_hand.value == dealer_hand.value:
-                push(player_hand, dealer_hand)
+                push(player_hand, dealer_hand, npc_hand)
                 game_stats.update_stats('push')
 
-            if npc_player.get_hand_value(dealer_hand) > 21:
+            if npc_hand.value > 21:
                 print("NPC BUSTS!")
-                game_stats.update_stats('player', dealer=True)
-            elif npc_player.get_hand_value(dealer_hand) == 21 and len(dealer_hand.cards) == 2:
+                game_stats.update_stats('player', 'npc')
+            elif npc_hand.value == 21 and len(npc_hand.cards) == 2:
                 print("NPC Blackjack!")
-                game_stats.update_stats('player_blackjack', dealer=True)
+                game_stats.update_stats('player_blackjack', 'npc_blackjack')
 
-        game_stats.display_stats()
+        game_stats.show_stats()
         print("\nPlayer's remaining chips: ", player_chips.total)
 
         if player_chips.total == 0:
