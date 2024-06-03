@@ -300,28 +300,24 @@ class GameStats:
         self.npc_wins = 0
         self.npc_blackjacks = 0
 
-    def update_stats(self, player_result, dealer_result=None):
-        self.games_played += 1
-        if player_result == 'player':
+    def update_stats(self, result, blackjack=False):
+        if result == 'player':
             self.player_wins += 1
-        elif player_result == 'player_blackjack':
-            self.player_blackjacks += 1
-        elif player_result == 'dealer':
+            if blackjack:
+                self.player_blackjacks += 1
+        elif result == 'dealer':
             self.dealer_wins += 1
-        elif player_result == 'push':
+            if blackjack:
+                self.dealer_blackjacks += 1
+        elif result == 'push':
             self.pushes += 1
-
-        if dealer_result == 'dealer_blackjack':
-            self.dealer_blackjacks += 1
-        elif dealer_result == 'dealer_surrender':
-            self.dealer_surrenders += 1
-        elif dealer_result == 'dealer_fold':
-            self.dealer_folds += 1
-
-        if dealer_result == 'npc':
+        elif result == 'npc':
             self.npc_wins += 1
-        elif dealer_result == 'npc_blackjack':
-            self.npc_blackjacks += 1
+            if blackjack:
+                self.npc_blackjacks += 1
+
+    def increment_games_played(self):
+        self.games_played += 1
 
     def show_stats(self):
         print("\nGame Statistics:")
@@ -335,6 +331,8 @@ class GameStats:
         print(f"Dealer Folds: {self.dealer_folds}")
         print(f"NPC Wins: {self.npc_wins}")
         print(f"NPC Blackjacks: {self.npc_blackjacks}")
+
+
 
 
 def reset_hands(deck, player_hand, dealer_hand, npc_hand):
@@ -428,11 +426,12 @@ while True:
 
             if npc_hand.value > 21:
                 print("NPC BUSTS!")
-                game_stats.update_stats('player', 'npc')
+                game_stats.update_stats('npc')
             elif npc_hand.value == 21 and len(npc_hand.cards) == 2:
                 print("NPC Blackjack!")
-                game_stats.update_stats('player_blackjack', 'npc_blackjack')
+                game_stats.update_stats('npc', blackjack=True)
 
+        game_stats.increment_games_played()  # Increment games_played
         game_stats.show_stats()
         print("\nPlayer's remaining chips: ", player_chips.total)
 
